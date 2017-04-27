@@ -1,12 +1,25 @@
 <div class="panel panel-default">
   <div class="panel-heading">
+    <div class="chart-image">
+      <img [src]="icon" />
+    </div>
     <h3 class="panel-title">
-      <div class="chart-image">
-        <img [src]="icon"/>
-      </div>
       <span>{{ header }}</span></h3>
   </div>
   <div class="panel-body">
-    Panel content
+    <div class="row">
+      <div class="col-xs-9 chart">
+
+      </div>
+      <div class="col-xs-3 info-box">
+        <div class="row">
+          <div class="sum">
+            <h4><span [innerHTML]="additionalHtml"></span>{{ sum }}</h4>
+            <h6>{{ summaryText }}</h6>
+          </div>
+          <button class=" pull-right chart-btn">{{ buttonText }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
