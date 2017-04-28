@@ -6,8 +6,11 @@
     <div class="input-group">
       <input type="text" class="form-control" placeholder="JSON file URL" [(ngModel)]="dataSource">
       <span class="input-group-btn">
-        <button class="btn btn-default" type="button">Set JSON</button>
+        <button class="btn btn-default" type="button" (click)="setDataSource();">Set JSON</button>
       </span>
     </div>
   </div>
 </div>
+
+<button class="btn btn-default" type="button" (click)="generate();">generate</button>
+<textarea style="width: 100%;height:100px;" [(value)]="json"></textarea>

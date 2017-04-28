@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { panels } from './panels';
 
 @Component({
   selector: 'dashboard-panel',
@@ -8,8 +9,8 @@ import { Component, OnInit } from '@angular/core';
 export class DashboardPanelComponent implements OnInit {
 
   constructor() { }
-
+  panelConfig;
   ngOnInit() {
+    this.panelConfig = panels;
   }
-
 }

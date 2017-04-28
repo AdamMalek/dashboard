@@ -9,12 +9,12 @@
   <div class="panel-body">
     <div class="row">
       <div class="col-xs-9 chart">
-
+        <dashboard-chart [data]="chartData" [dataProperty]="dataProperty"></dashboard-chart>
       </div>
       <div class="col-xs-3 info-box">
         <div class="row">
           <div class="sum">
-            <h4><span [innerHTML]="additionalHtml"></span>{{ sum }}</h4>
+            <h4><span [innerHTML]="additionalHtml"></span>{{ value }}</h4>
             <h6>{{ summaryText }}</h6>
           </div>
           <button class=" pull-right chart-btn">{{ buttonText }}</button>

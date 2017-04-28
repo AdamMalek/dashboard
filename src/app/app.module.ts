@@ -8,6 +8,7 @@ import { DataPanelComponent } from './data-panel/data-panel.component';
 import { DashboardPanelComponent } from './dashboard-panel/dashboard-panel.component';
 import { DataService } from "app/common/data.service";
 import { GraphComponent } from './dashboard-panel/graph/graph.component';
+import { ChartComponent } from "app/dashboard-panel/graph/chart/chart.component";
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { GraphComponent } from './dashboard-panel/graph/graph.component';
     DataPanelComponent,
     DashboardPanelComponent,
     GraphComponent,
+    ChartComponent,
   ],
   imports: [
     BrowserModule,

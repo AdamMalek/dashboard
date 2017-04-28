@@ -1,13 +1,17 @@
 import { Injectable, Output, EventEmitter } from '@angular/core';
 import { Http } from "@angular/http";
+import { IData } from "app/common/data";
+import { Observable } from "rxjs";
 
 @Injectable()
 export class DataService {
 
-  dataSource: string = "";
-  @Output() sourceChanged:EventEmitter<string> = new EventEmitter<string>(); 
+  dataSource: string = "https://raw.githubusercontent.com/AdamMalek/TestDatsa/master/test1.json";
+  @Output() dataUpdated: EventEmitter<IData> = new EventEmitter<IData>();
 
-    constructor(private _http: Http) { }
+  constructor(private _http: Http) { 
+    this.getData();
+  }
 
   getDataSource(): string {
     return this.dataSource;
@@ -15,10 +19,21 @@ export class DataService {
 
   setDataSource(dataSource: string): void {
     this.dataSource = dataSource;
-    this.sourceChanged.emit(dataSource);
+    this.getData();
   }
 
-  getData() {
-    
+  private getData(): void {
+    if (this.dataSource == "") {
+      this.dataUpdated.emit(null);
+    }
+    else {
+      this._http.get(this.dataSource).subscribe(
+        (data) => {
+            this.dataUpdated.emit(data.json());
+        },
+        () => {
+            this.dataUpdated.emit(null);
+        });
+    }
   }
 }
