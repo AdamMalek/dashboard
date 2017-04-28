@@ -19,7 +19,6 @@ export class ChartComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    console.log(this.id);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -42,10 +41,16 @@ export class ChartComponent implements OnInit, OnChanges {
     let legend = this.getLegend();
     legend.html("");
     if (this.data) {
-      var list = legend.append("ul");
-      this.data.labels.forEach((l) => {
-        list.append("li").text(l);
-      });
+      var list = legend.append("svg").attr("height","40");
+      for (let i=0;i<this.data.labels.length;i++){
+        var color = this.data.colors[i];
+        var label = this.data.labels[i];
+        let x = 15 + 70*i;
+        let y = 15;
+        let item = list.append("svg").attr("text-align","center");
+        item.append("circle").attr("cx",x).attr("cy",15).attr("r",5).attr("fill",color);
+        item.append("text").attr("x",x+10).attr("y",20).attr("fill","black").text(label);
+      }
     }
   }
 

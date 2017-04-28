@@ -1,4 +1,5 @@
 export interface IData{
+    colors: string[];
     labels: string[];
     timestamp: number;
     data: IChartData[];
