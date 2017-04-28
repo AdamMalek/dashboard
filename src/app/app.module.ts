@@ -9,6 +9,7 @@ import { DashboardPanelComponent } from './dashboard-panel/dashboard-panel.compo
 import { DataService } from "app/common/data.service";
 import { GraphComponent } from './dashboard-panel/graph/graph.component';
 import { ChartComponent } from "app/dashboard-panel/graph/chart/chart.component";
+import { D3Service } from "d3-ng2-service";
 
 @NgModule({
   declarations: [
@@ -23,7 +24,7 @@ import { ChartComponent } from "app/dashboard-panel/graph/chart/chart.component"
     FormsModule,
     HttpModule
   ],
-  providers: [DataService],
+  providers: [DataService, D3Service],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

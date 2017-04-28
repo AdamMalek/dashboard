@@ -1,1 +1,7 @@
-<canvas id="chart-canvas"></canvas>
+<h3 id="no-data" *ngIf="!data else chart">NO DATA</h3>
+<ng-template #chart>
+    <div [ngClass]="id">
+        <div class="row" class="chart-area"></div>
+        <div class="row" class="legend-area"></div>
+    </div>
+</ng-template>

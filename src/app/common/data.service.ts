@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class DataService {
 
-  dataSource: string = "https://raw.githubusercontent.com/AdamMalek/TestDatsa/master/test1.json";
+  dataSource: string = "https://raw.githubusercontent.com/AdamMalek/TestData/master/test1.json";
   @Output() dataUpdated: EventEmitter<IData> = new EventEmitter<IData>();
 
   constructor(private _http: Http) { 

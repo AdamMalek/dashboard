@@ -11,6 +11,6 @@ export class DashboardPanelComponent implements OnInit {
   constructor() { }
   panelConfig;
   ngOnInit() {
-    this.panelConfig = panels;
+    this.panelConfig = panels.filter(x=> x.enabled);
   }
 }

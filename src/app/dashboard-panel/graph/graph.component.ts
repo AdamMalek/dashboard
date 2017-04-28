@@ -57,8 +57,11 @@ export class GraphComponent implements OnInit, OnDestroy {
           this.dataTimestamp = d.timestamp;
         }
       }
+      else{
+        this.chartData = null;
+        this.value = 0;
+      }
     })
-    this.refreshData();
   }
 
   ngOnDestroy(): void {
