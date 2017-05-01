@@ -1,5 +1,6 @@
 export const panels = [
     {
+        chartType: "bar",
         enabled: true,
         dataProperty: "revenue",
         icon: "assets/dollar.svg",
@@ -9,6 +10,7 @@ export const panels = [
         additionalHtml: "$"
     },
     {
+        chartType: "line",
         enabled: true,
         dataProperty:"installations",
         icon:"assets/arrow.svg",

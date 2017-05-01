@@ -15,6 +15,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   @Input() buttonText: string;
   @Input() additionalHtml: string;
   @Input() dataProperty: string;
+  @Input() chartType:string;
 
   dataTimestamp: number = 0;
   dataSub: Subscription;
