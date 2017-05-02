@@ -33,6 +33,11 @@
     .panel-title{
         margin-top: -2px;
     }
+    @media all and (max-width: 1199px){ 
+        max-width: 420px;
+        margin: 0 auto;
+        margin-bottom: 20px;
+    }
 
     .panel-heading{
         @include panel-border();
@@ -56,7 +61,6 @@
         }
 
     .panel-body{
-        min-height: 200px;
         .info-box{
             .sum{
                 text-align: right;
@@ -79,7 +83,6 @@
                     font-weight: bold;
                 }
             }
-            min-height: 170px;
             button.chart-btn{
                 color: white;
                 position: absolute;
@@ -96,6 +99,7 @@
                 font-size: 1em;
                 max-width:100%;
                 height:30px;
+                margin-top: 50px;
                 box-shadow: 
                     0 0 0 1px #fff,
                     0 0 2px 1px #fff,

@@ -2,10 +2,16 @@
 <ng-template #chart>
     <div [ngClass]="id">
         <div class="row" class="chart-area">
-            <svg width="400" height="200">
-                <g class="axis" transform="translate(10,0)"></g>
-                <g class="legend" transform="translate(10,0)"></g>
-                <g class="chart" transform="translate(10,0)"></g>
+            <svg width="380" height="150">
+                <g class="axis" transform="translate(0,10)">
+                    <svg width="380" height="120"></svg>
+                </g>
+                <g class="legend" transform="translate(0,110)">
+                    <svg width="380" height="50"></svg>
+                </g>
+                <g class="chart" transform="translate(20,10)">
+                    <svg width="380" height="100"></svg>
+                </g>
             </svg>
         </div>
     </div>

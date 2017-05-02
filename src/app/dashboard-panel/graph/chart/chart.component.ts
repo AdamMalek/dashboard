@@ -17,6 +17,16 @@ export class ChartComponent implements OnInit, OnChanges {
   d3: D3;
   id = "panel-" + Math.ceil(Math.random() * 9999999999999999);
 
+  //odstep miedzy grupami w px
+  groupSpacing = 5;
+  //odstep miedzy slupkami w grupie w px
+  rectSpacing = 3;
+  //lewy margines
+  chartMargin = 5;
+  rectWidth;
+  pointRadius= 5;
+  groupWidth;
+
   constructor(private element: ElementRef, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
   }
@@ -46,6 +56,7 @@ export class ChartComponent implements OnInit, OnChanges {
   refreshData() {
     let canvas = this.getChart();
     if (!canvas.empty()) {
+      this.calculateSizes();
       this.drawLegend();
       this.drawAxis();
       this.drawChart();
@@ -53,24 +64,165 @@ export class ChartComponent implements OnInit, OnChanges {
   }
 
   drawAxis() {
-    let d3 = this.d3;
+    let axis = this.getAxis();
+
+    axis.selectAll("g").remove();
+    let width = +axis.attr("width");
+    let height = +axis.attr("height") - 20;
+
+    let max = this.getScale().domain()[1];
+
+    let yAxis = axis.append("g").attr("class", "y-axis");
+
+    yAxis.append("line")
+      .attr("x1", 20)
+      .attr("y1", 0)
+      .attr("x2", 20)
+      .attr("y2", height)
+      .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
+
+    yAxis.append("line")
+      .attr("x1", 20)
+      .attr("y1", 0)
+      .attr("x2", width)
+      .attr("y2", 0)
+      .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
+
+    yAxis.append("line")
+      .attr("x1", 20)
+      .attr("y1", height / 2)
+      .attr("x2", width)
+      .attr("y2", height / 2)
+      .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
+
+    yAxis.append("line")
+      .attr("x1", 20)
+      .attr("y1", height)
+      .attr("x2", width)
+      .attr("y2", height)
+      .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
+
+    yAxis.append("text")
+      .text(max)
+      .attr("fill", "rgb(47,108,166)")
+      .attr("style", "font-weight:bold")
+      .attr("x", 0)
+      .attr("y", 10);
+    yAxis.append("text")
+      .text(max/2)
+      .attr("style", "font-weight:bold")
+      .attr("fill", "rgb(47,108,166)")
+      .attr("x", 0)
+      .attr("y", height / 2 + 5);
+    yAxis.append("text")
+      .text(0)
+      .attr("style", "font-weight:bold")
+      .attr("fill", "rgb(47,108,166)")
+      .attr("x", 0)
+      .attr("y", height);
+
+    let xAxis = axis.append("g").attr("class", "x-axis").attr("transform", "translate(20," + height + ")").selectAll("g")
+      .data(this.data.data)
+      .enter();
+
+    xAxis.append("line")
+      .transition()
+      .attr("x1", (d, i) => this.chartMargin + (i + 1) * (this.groupWidth + this.groupSpacing) - this.groupSpacing)
+      .attr("x2", (d, i) => this.chartMargin + (i + 1) * (this.groupWidth + this.groupSpacing) - this.groupSpacing)
+      .attr("y1", 0)
+      .attr("y2", 5)
+      .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
+    xAxis.append("text")
+      .transition()
+      .attr("x", (d, i) => this.chartMargin + i * (this.groupWidth + this.groupSpacing) + 10)
+      .attr("y", 15)
+      .attr("style", "font-weight:bold;font-size:0.8em")
+      .attr("fill", "rgb(47,108,166)")
+      .text((d, i) => "Week " + (i + 1));
+  }
+
+  calculateSizes() {
     let canvas = this.getChart();
+    let height = +canvas.attr("height");
 
-    let scale = this.getScale();
-    let max = scale.range()[1];
-
-    scale.range([max, 0]);
-
-    let axis = d3.axisLeft(this.getScale())
-      .ticks(1)
-      .tickFormat((d) => {
-        return (max - <number>d).toString();
-      });
-    canvas.select("g.axis").call(axis).selectAll("line").remove();
+    let width = +canvas.attr("width") - this.chartMargin;
+    let dataLen = this.data.data.map(x => x[this.dataProperty].length);
+    let rectNr = this.d3.max(dataLen) * dataLen.length;
+    this.rectWidth = (0.85 * width - 30) / rectNr;
+    this.rectWidth = _.clamp(this.rectWidth, 0, 40);
+    //szerokosc pojedynczej grupy (szerokosc slupkow + odstepy miedzy nimi)
+    this.groupWidth = (this.rectWidth + this.rectSpacing) * this.d3.max(dataLen) - this.rectSpacing;
   }
 
   drawLineChart() {
+    let d3 = this.d3;
+    let canvas = this.getChart();
+    let height = +canvas.attr("height");
+    let width = +canvas.attr("width");
+    let flatData = _.flatten(this.data.data.map(x => <number[]>x[this.dataProperty]));
+    let scale = this.getScale();
 
+    let group = canvas.selectAll("g.group")
+      .data(this.data.data);
+
+    //utworzenie grupy (każda grupa to zbiór wartości na dany tydzień)
+    let point = group.enter()
+      .append("g")
+      .attr("class", "group")
+      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
+      .selectAll("circle")
+      .data(d => <number[]>d[this.dataProperty]);
+
+    // utworzenie punktu w nowo utworzonej grupie
+    point.enter()
+      .append("circle")
+      .attr("cx", (d, i) => (this.groupWidth / 2))
+      .attr("cy", height)
+      .attr("r", this.pointRadius)
+      .attr("fill", (d, i) => this.data.colors[i])
+      .transition()
+      .attr("cy", (d, i) => height - scale(d))
+
+    // update wartosci slupka
+    group
+      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
+      .selectAll("circle")
+      .data(d => <number[]>d[this.dataProperty])
+      .transition()
+      .attr("cx", (d, i) => (this.groupWidth / 2))
+      .attr("cy", (d, i) => height - scale(d))
+      .attr("fill", (d, i) => this.data.colors[i]);
+
+    // usuniecie slupka z grupy (np tydzien 1 -> [1,2,3], tydzien 2-> [1,2], ponizsze wykona sie dla slupka 3)
+    group.selectAll("circle")
+      .data(d => <number[]>d[this.dataProperty])
+      .exit()
+      .transition()
+      .attr("fill", "black")
+      .attr("cy", height)
+      .remove();
+
+    // utworzenie slupka w istniejacej grupie (np tydzien 1 -> [1,2], tydzien 2-> [1,2,3], ponizsze wykona sie dla slupka 3)
+    group.selectAll("circle")
+      .data(d => <number[]>d[this.dataProperty])
+      .enter()
+      .append("circle")
+      .attr("cx", (d, i) => (this.groupWidth / 2))
+      .attr("cy", height)
+      .attr("r", this.pointRadius)
+      .attr("fill", (d, i) => this.data.colors[i])
+      .transition()
+      .attr("cy", (d, i) => height - scale(d))
+
+    //usuniecie grupy
+    group.exit()
+      .selectAll("circle")
+      .transition()
+      .attr("fill", "black")
+      .attr("cy", height)
+    group.exit().transition().remove();
+
+    canvas.selectAll("line").remove();
   }
 
   getScale() {
@@ -81,6 +233,12 @@ export class ChartComponent implements OnInit, OnChanges {
     let width = +canvas.attr("width");
     let flatData: number[] = _.flatten(this.data.data.map(x => <number[]>x[this.dataProperty]));
     let max = d3.max(flatData);
+    if (max > 6) {
+      max = max + ((10 - (max % 10)) % 10);
+    }
+    else {
+      max = 6;
+    }
 
     return d3.scaleLinear()
       .domain([0, max])
@@ -90,43 +248,28 @@ export class ChartComponent implements OnInit, OnChanges {
   drawBarChart() {
     let d3 = this.d3;
 
-    let screen = this.getCanvas();
     let canvas = this.getChart();
-    let height = +screen.attr("height");
-    let width = +screen.attr("width");
+    let height = +canvas.attr("height");
+    let width = +canvas.attr("width");
     let flatData = _.flatten(this.data.data.map(x => <number[]>x[this.dataProperty]));
-    let max = d3.max(flatData);
     let scale = this.getScale();
 
     let group = canvas.selectAll("g.group")
       .data(this.data.data);
 
-    //odstep miedzy grupami w px
-    let groupSpacing = 5;
-    //odstep miedzy slupkami w grupie w px
-    let rectSpacing = 3;
-    //lewy margines
-    let chartMargin = 40;
-    let dataLen = this.data.data.map(x => x[this.dataProperty].length);
-    let rectNr = d3.max(dataLen) * dataLen.length;
-    let rectWidth = (0.8 * width) / rectNr;
-    rectWidth = _.clamp(rectWidth, 0, 40);
-    //szerokosc pojedynczej grupy (szerokosc slupkow + odstepy miedzy nimi)
-    let groupWidth = (rectWidth + rectSpacing) * d3.max(dataLen) - rectSpacing;
-
     //utworzenie grupy (każda grupa to zbiór wartości na dany tydzień)
     let rect = group.enter()
       .append("g")
       .attr("class", "group")
-      .attr("transform", (d, i) => "translate(" + (chartMargin + i * (groupWidth + groupSpacing)) + ",10)")
+      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("rect")
       .data(d => <number[]>d[this.dataProperty]);
 
     // utworzenie słupka w nowo utworzonej grupie
     rect.enter()
       .append("rect")
-      .attr("width", rectWidth)
-      .attr("x", (d, i) => i * (rectWidth + rectSpacing))
+      .attr("width", this.rectWidth)
+      .attr("x", (d, i) => i * (this.rectWidth + this.rectSpacing))
       .attr("y", height)
       .attr("height", 0)
       .attr("fill", (d, i) => this.data.colors[i])
@@ -136,11 +279,12 @@ export class ChartComponent implements OnInit, OnChanges {
 
     // update wartosci slupka
     group
-      .attr("transform", (d, i) => "translate(" + (chartMargin + i * (groupWidth + groupSpacing)) + ",10)")
+      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("rect")
       .data(d => <number[]>d[this.dataProperty])
       .transition()
-      .attr("width", rectWidth)
+      .attr("width", this.rectWidth)
+      .attr("x", (d, i) => i * (this.rectWidth + this.rectSpacing))
       .attr("y", (d, i) => height - scale(<number>d))
       .attr("height", (d) => scale(<number>d))
       .attr("fill", (d, i) => this.data.colors[i]);
@@ -160,8 +304,8 @@ export class ChartComponent implements OnInit, OnChanges {
       .data(d => <number[]>d[this.dataProperty])
       .enter()
       .append("rect")
-      .attr("width", rectWidth)
-      .attr("x", (d, i) => i * (rectWidth + rectSpacing))
+      .attr("width", this.rectWidth)
+      .attr("x", (d, i) => i * (this.rectWidth + this.rectSpacing))
       .attr("y", height)
       .attr("height", 0)
       .attr("fill", (d, i) => this.data.colors[i])
@@ -177,27 +321,27 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("height", 10)
       .attr("y", height)
     group.exit().transition().remove();
-
   }
 
   drawLegend() {
     let legend = this.getLegend();
-    legend.html("");
+    legend.selectAll("g").remove();
     if (this.data) {
-      var list = legend.append("svg").attr("height", "40");
+      var list = legend.append("g").attr("height", "40");
       for (let i = 0; i < this.data.labels.length; i++) {
         var color = this.data.colors[i];
         var label = this.data.labels[i];
         let x = 15 + 70 * i;
-        let y = 15;
-        let item = list.append("svg").attr("text-align", "center");
-        item.append("circle").attr("cx", x).attr("cy", 15).attr("r", 5).attr("fill", color);
-        item.append("text").attr("x", x + 10).attr("y", 20).attr("fill", "black").text(label);
+        let y = +this.getCanvas().attr("height") - 20;
+        let item = list.append("svg");
+        item.append("circle").attr("cx", x).attr("cy", 30).attr("r", 5).attr("fill", color);
+        item.append("text").attr("fill", "black").attr("style", "font-size:0.9em;").attr("x", x + 10).attr("y", 35).text(label);
       }
     }
   }
 
   private getCanvas() { return this.d3.select("." + this.id + " .chart-area svg"); }
-  private getChart() { return this.d3.select("." + this.id + " .chart-area .chart"); }
-  private getLegend() { return this.d3.select("." + this.id + " .legend-area"); }
+  private getAxis() { return this.d3.select("." + this.id + " .chart-area .axis svg"); }
+  private getChart() { return this.d3.select("." + this.id + " .chart-area .chart svg"); }
+  private getLegend() { return this.d3.select("." + this.id + " .legend svg"); }
 }
