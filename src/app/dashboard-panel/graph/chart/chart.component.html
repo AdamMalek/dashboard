@@ -2,8 +2,11 @@
 <ng-template #chart>
     <div [ngClass]="id">
         <div class="row" class="chart-area">
-            <svg width="400" height="300"></svg>
+            <svg width="400" height="200">
+                <g class="axis" transform="translate(10,0)"></g>
+                <g class="legend" transform="translate(10,0)"></g>
+                <g class="chart" transform="translate(10,0)"></g>
+            </svg>
         </div>
-        <div class="row" class="legend-area"></div>
     </div>
 </ng-template>

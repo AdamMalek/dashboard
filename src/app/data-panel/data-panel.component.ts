@@ -23,7 +23,7 @@ export class DataPanelComponent implements OnInit {
   }
 
   set(i){
-      this.dataService.setDataSource("https://raw.githubusercontent.com/AdamMalek/TestData/master/test"+(i+1)+".json");
+      this.dataService.setDataSource("http://localhost:3000/test"+(i+1)+".json");
   }
 
   json:string="dsa";
