@@ -24,7 +24,7 @@ export class ChartComponent implements OnInit, OnChanges {
   //lewy margines
   chartMargin = 5;
   rectWidth;
-  pointRadius= 5;
+  pointRadius = 5;
   groupWidth;
 
   constructor(private element: ElementRef, d3Service: D3Service) {
@@ -47,7 +47,7 @@ export class ChartComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes["data"] != null && !changes["data"].firstChange) {
+    if (changes["data"].currentValue != null && !changes["data"].firstChange) {
       this.data = changes["data"].currentValue;
       this.refreshData();
     }
@@ -109,7 +109,7 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("x", 0)
       .attr("y", 10);
     yAxis.append("text")
-      .text(max/2)
+      .text(max / 2)
       .attr("style", "font-weight:bold")
       .attr("fill", "rgb(47,108,166)")
       .attr("x", 0)
@@ -181,19 +181,19 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("r", this.pointRadius)
       .attr("fill", (d, i) => this.data.colors[i])
       .transition()
-      .attr("cy", (d, i) => height - scale(d))
+      .attr("cy", (d, i) => { return height - scale(d) })
 
-    // update wartosci slupka
+    // update wartosci punktu
     group
       .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("circle")
       .data(d => <number[]>d[this.dataProperty])
       .transition()
       .attr("cx", (d, i) => (this.groupWidth / 2))
-      .attr("cy", (d, i) => height - scale(d))
+      .attr("cy", (d, i) => { return height - scale(d) })
       .attr("fill", (d, i) => this.data.colors[i]);
 
-    // usuniecie slupka z grupy (np tydzien 1 -> [1,2,3], tydzien 2-> [1,2], ponizsze wykona sie dla slupka 3)
+    // usuniecie punktu z grupy (np tydzien 1 -> [1,2,3], tydzien 2-> [1,2], ponizsze wykona sie dla punktu 3)
     group.selectAll("circle")
       .data(d => <number[]>d[this.dataProperty])
       .exit()
@@ -202,7 +202,7 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("cy", height)
       .remove();
 
-    // utworzenie slupka w istniejacej grupie (np tydzien 1 -> [1,2], tydzien 2-> [1,2,3], ponizsze wykona sie dla slupka 3)
+    // utworzenie punktu w istniejacej grupie (np tydzien 1 -> [1,2], tydzien 2-> [1,2,3], ponizsze wykona sie dla punktu 3)
     group.selectAll("circle")
       .data(d => <number[]>d[this.dataProperty])
       .enter()
@@ -212,17 +212,28 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("r", this.pointRadius)
       .attr("fill", (d, i) => this.data.colors[i])
       .transition()
-      .attr("cy", (d, i) => height - scale(d))
+      .attr("cy", (d, i) => { return height - scale(d) })
 
     //usuniecie grupy
     group.exit()
       .selectAll("circle")
       .transition()
       .attr("fill", "black")
-      .attr("cy", height)
+      .attr("cy", (d, i) => { return height; })
     group.exit().transition().remove();
 
-    canvas.selectAll("line").remove();
+    group.selectAll("line").remove();
+
+    let vals = this.data.data.map(x => <number[]>x[this.dataProperty]);
+
+    if (vals.length > 1) {
+      for (let i = 0; i < vals.length; i++)
+        for (let j = 0; j < vals.length; j++) {
+          group.append("line")
+               .attr("x1",()=> (i+1) * (this.groupWidth / 2) - this.groupWidth/2)
+               .attr("")
+        }
+    }
   }
 
   getScale() {

@@ -25,23 +25,4 @@ export class DataPanelComponent implements OnInit {
   set(i){
       this.dataService.setDataSource("http://localhost:3000/test"+(i+1)+".json");
   }
-
-  json:string="dsa";
-
-  generate(){
-    // let data:IData = {
-    //   labels: ["test1","test2","test3"],
-    //   timestamp: Date.now(),
-    //   data: [
-    //     {
-    //       date: new Date('2017-01-01'),
-    //       installations: [1,2,3],
-    //       revenue: [10,20,30]
-    //     }
-    //   ]
-    // };
-
-    // this.json = JSON.stringify(data);
-
-  }
 }
