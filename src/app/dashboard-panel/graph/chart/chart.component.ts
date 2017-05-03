@@ -24,7 +24,7 @@ export class ChartComponent implements OnInit, OnChanges {
   //lewy margines
   chartMargin = 5;
   rectWidth;
-  pointRadius = 5;
+  pointRadius = 6;
   groupWidth;
 
   constructor(private element: ElementRef, d3Service: D3Service) {
@@ -162,8 +162,40 @@ export class ChartComponent implements OnInit, OnChanges {
     let flatData = _.flatten(this.data.data.map(x => <number[]>x[this.dataProperty]));
     let scale = this.getScale();
 
+    let points = this.data.data
+      .map(x => <number[]>x[this.dataProperty].map(y => height - scale(y)));
+
     let group = canvas.selectAll("g.group")
-      .data(this.data.data);
+      .data(points);
+
+    let path = d3.line<any>()
+      .x((d) => {
+        let i = d.x;
+        let ret = (this.groupWidth / 2) + this.chartMargin + i * (this.groupWidth + this.groupSpacing);
+        return ret;
+      })
+      .y((d) => d.y);
+    /*(this.chartMargin + i * (this.groupWidth + this.groupSpacing)) */
+    let linePoints = _.flatten(points.map((x, i) => x.map((y, j) => { return { x: i, y: y, c: j } })));
+    let grouped = _.groupBy(linePoints, x => x.c);
+    var arr = _.values(grouped);
+    let lines = canvas.selectAll("path")
+      .data(arr);
+
+    lines
+      .enter()
+      .append("path")
+      .attr("fill", "none")
+      .attr("stroke", (x, i) => this.data.colors[i])
+      .attr("stroke-width", this.pointRadius)
+      .attr("d", path);
+
+    lines.transition().attr("d", path);
+
+    lines.exit()
+      .attr("fill", "red")
+      .remove();
+
 
     //utworzenie grupy (każda grupa to zbiór wartości na dany tydzień)
     let point = group.enter()
@@ -171,31 +203,33 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("class", "group")
       .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("circle")
-      .data(d => <number[]>d[this.dataProperty]);
+      .data(d => d);
 
     // utworzenie punktu w nowo utworzonej grupie
     point.enter()
       .append("circle")
       .attr("cx", (d, i) => (this.groupWidth / 2))
+      .attr("stroke", "white")
+      .attr("stroke-width", "3")
       .attr("cy", height)
       .attr("r", this.pointRadius)
       .attr("fill", (d, i) => this.data.colors[i])
       .transition()
-      .attr("cy", (d, i) => { return height - scale(d) })
+      .attr("cy", d => d);
 
     // update wartosci punktu
     group
       .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("circle")
-      .data(d => <number[]>d[this.dataProperty])
+      .data(d => d)
       .transition()
       .attr("cx", (d, i) => (this.groupWidth / 2))
-      .attr("cy", (d, i) => { return height - scale(d) })
+      .attr("cy", d => d)
       .attr("fill", (d, i) => this.data.colors[i]);
 
     // usuniecie punktu z grupy (np tydzien 1 -> [1,2,3], tydzien 2-> [1,2], ponizsze wykona sie dla punktu 3)
     group.selectAll("circle")
-      .data(d => <number[]>d[this.dataProperty])
+      .data(d => d)
       .exit()
       .transition()
       .attr("fill", "black")
@@ -204,36 +238,25 @@ export class ChartComponent implements OnInit, OnChanges {
 
     // utworzenie punktu w istniejacej grupie (np tydzien 1 -> [1,2], tydzien 2-> [1,2,3], ponizsze wykona sie dla punktu 3)
     group.selectAll("circle")
-      .data(d => <number[]>d[this.dataProperty])
+      .data(d => d)
       .enter()
       .append("circle")
       .attr("cx", (d, i) => (this.groupWidth / 2))
       .attr("cy", height)
       .attr("r", this.pointRadius)
       .attr("fill", (d, i) => this.data.colors[i])
+      .attr("stroke", "white")
+      .attr("stroke-width", "3")
       .transition()
-      .attr("cy", (d, i) => { return height - scale(d) })
+      .attr("cy", d => d)
 
     //usuniecie grupy
     group.exit()
       .selectAll("circle")
       .transition()
       .attr("fill", "black")
-      .attr("cy", (d, i) => { return height; })
+      .attr("cy", height)
     group.exit().transition().remove();
-
-    group.selectAll("line").remove();
-
-    let vals = this.data.data.map(x => <number[]>x[this.dataProperty]);
-
-    if (vals.length > 1) {
-      for (let i = 0; i < vals.length; i++)
-        for (let j = 0; j < vals.length; j++) {
-          group.append("line")
-               .attr("x1",()=> (i+1) * (this.groupWidth / 2) - this.groupWidth/2)
-               .attr("")
-        }
-    }
   }
 
   getScale() {
