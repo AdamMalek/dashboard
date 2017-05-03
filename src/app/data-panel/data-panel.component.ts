@@ -9,20 +9,26 @@ import { IData } from "app/common/data";
 })
 export class DataPanelComponent implements OnInit {
 
-  constructor(private dataService:DataService) { }
+  constructor(private dataService: DataService) { }
 
-  dataSource:string;
+  dataSource: string;
+  updating = false;
 
-  setDataSource(){
-    if (this.dataSource != ""){
+  setDataSource() {
+    if (this.dataSource != "") {
       this.dataService.setDataSource(this.dataSource);
+      this.updating = true;
     }
   }
   ngOnInit() {
-    this.dataSource = this.dataService.getDataSource();
+    this.dataService.dataUpdated.subscribe(() => {
+      this.dataSource = this.dataService.getDataSource();
+      this.updating = false;
+    });
   }
 
-  set(i){
-      this.dataService.setDataSource("http://localhost:3000/test"+(i+1)+".json");
+  set(i) {
+    this.dataService.setDataSource("https://raw.githubusercontent.com/AdamMalek/TestData/master/test" + (i + 1) + ".json");
+      this.updating = true;
   }
 }
