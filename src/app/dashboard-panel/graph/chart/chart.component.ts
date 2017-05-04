@@ -128,8 +128,8 @@ export class ChartComponent implements OnInit, OnChanges {
 
     xAxis.append("line")
       .transition()
-      .attr("x1", (d, i) => this.chartMargin + (i + 1) * (this.groupWidth + this.groupSpacing) - this.groupSpacing)
-      .attr("x2", (d, i) => this.chartMargin + (i + 1) * (this.groupWidth + this.groupSpacing) - this.groupSpacing)
+      .attr("x1", (d, i) => this.chartMargin -2 + (i + 1) * (this.groupWidth + this.groupSpacing) - (this.groupWidth + this.groupSpacing) / 2)
+      .attr("x2", (d, i) => this.chartMargin -2 + (i + 1) * (this.groupWidth + this.groupSpacing) - (this.groupWidth + this.groupSpacing) / 2)
       .attr("y1", 0)
       .attr("y2", 5)
       .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
@@ -190,11 +190,10 @@ export class ChartComponent implements OnInit, OnChanges {
         return ret;
       })
       .y((d) => d.y);
-    /*(this.chartMargin + i * (this.groupWidth + this.groupSpacing)) */
     let linePoints = _.flatten(points.map((x, i) => x.map((y, j) => { return { x: i, y: y, c: j } })));
     let grouped = _.groupBy(linePoints, x => x.c);
     var arr = _.values(grouped);
-    let lines = canvas.selectAll("path")
+    let lines = canvas.select("g.lines").selectAll("path")
       .data(arr);
 
     lines

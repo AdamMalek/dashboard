@@ -32,6 +32,10 @@
 
     .panel-title{
         margin-top: -2px;
+
+        .chart-header{
+            font-size: 0.8em;
+        }
     }
     @media all and (max-width: 1199px){ 
         max-width: 420px;
@@ -62,6 +66,10 @@
 
     .panel-body{
         .info-box{
+            .summary{
+                color:rgb(47,108,166);
+            }
+
             .sum{
                 text-align: right;
                 margin-right: 20px;
