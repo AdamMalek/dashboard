@@ -26,8 +26,8 @@ export class DataPanelComponent implements OnInit {
       this.updating = false;
     });
   }
-  // testUrlBase = "https://raw.githubusercontent.com/AdamMalek/TestData/master";
-  testUrlBase = "http://localhost:3000";
+  testUrlBase = "https://raw.githubusercontent.com/AdamMalek/TestData/master";
+  // testUrlBase = "http://localhost:3000";
   set(i) {
     this.dataService.setDataSource(this.testUrlBase + "/test" + (i + 1) + ".json");
     this.updating = true;
