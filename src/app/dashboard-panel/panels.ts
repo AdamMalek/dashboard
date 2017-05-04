@@ -1,8 +1,8 @@
 export const panels = [
     {
         chartType: "bar",
-        enabled: true,
         dataProperty: "revenue",
+        enabled: true,
         icon: "assets/dollar.svg",
         header: "Revenue by Solution",
         summaryText: "Revenue stream",

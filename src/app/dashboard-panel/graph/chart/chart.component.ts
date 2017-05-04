@@ -26,6 +26,7 @@ export class ChartComponent implements OnInit, OnChanges {
   rectWidth;
   pointRadius = 6;
   groupWidth;
+  chartOffset = 0;
 
   constructor(private element: ElementRef, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -134,24 +135,38 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("style", "stroke:#888;stroke-width:1;shape-rendering:crispEdges");
     xAxis.append("text")
       .transition()
-      .attr("x", (d, i) => this.chartMargin + i * (this.groupWidth + this.groupSpacing) + 10)
+      .attr("x", (d, i) => this.chartMargin + (i + 1) * (this.groupWidth + this.groupSpacing) - (this.groupWidth + this.groupSpacing) / 2)
       .attr("y", 15)
-      .attr("style", "font-weight:bold;font-size:0.8em")
+      .attr("text-anchor", "middle")
+      .attr("style", "font-weight:bold;font-size:0.8em;")
       .attr("fill", "rgb(47,108,166)")
-      .text((d, i) => "Week " + (i + 1));
+      .text((d, i) => {
+        let res = (this.groupSpacing + this.groupWidth) < 35 ? "W." : "Week ";
+        return res + (i + 1);
+      });
   }
 
   calculateSizes() {
     let canvas = this.getChart();
     let height = +canvas.attr("height");
 
-    let width = +canvas.attr("width") - this.chartMargin;
+    let width = +canvas.attr("width") - this.chartMargin - 20;
     let dataLen = this.data.data.map(x => x[this.dataProperty].length);
-    let rectNr = this.d3.max(dataLen) * dataLen.length;
-    this.rectWidth = (0.85 * width - 30) / rectNr;
-    this.rectWidth = _.clamp(this.rectWidth, 0, 40);
-    //szerokosc pojedynczej grupy (szerokosc slupkow + odstepy miedzy nimi)
-    this.groupWidth = (this.rectWidth + this.rectSpacing) * this.d3.max(dataLen) - this.rectSpacing;
+
+    let groupCount = dataLen.length;
+    let groupSize = this.d3.max(dataLen);
+    this.groupWidth = (width - ((groupCount - 1) * this.groupSpacing)) / groupCount;
+    this.rectWidth = (this.groupWidth - (groupSize * this.rectSpacing)) / groupSize;
+
+    this.rectWidth = _.clamp(this.rectWidth, 1, 40);
+    
+    let dw = (this.groupWidth + this.groupSpacing) - (groupSize * (this.rectSpacing + this.rectWidth));
+    if (dw > 0) {
+      this.chartOffset = dw / 2;
+    }
+    else {
+      this.chartOffset = 0;
+    }
   }
 
   drawLineChart() {
@@ -190,7 +205,7 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("stroke-width", this.pointRadius)
       .attr("d", path);
 
-    lines.transition().attr("d", path);
+    lines.transition().attr("stroke", (x, i) => this.data.colors[i]).attr("d", path);
 
     lines.exit()
       .attr("fill", "red")
@@ -295,7 +310,7 @@ export class ChartComponent implements OnInit, OnChanges {
     let rect = group.enter()
       .append("g")
       .attr("class", "group")
-      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
+      .attr("transform", (d, i) => "translate(" + (this.chartOffset + this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("rect")
       .data(d => <number[]>d[this.dataProperty]);
 
@@ -312,8 +327,10 @@ export class ChartComponent implements OnInit, OnChanges {
       .attr("height", (d) => scale(d));
 
     // update wartosci slupka
+    group.transition()
+      .attr("transform", (d, i) => "translate(" + (this.chartOffset + this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)");
+
     group
-      .attr("transform", (d, i) => "translate(" + (this.chartMargin + i * (this.groupWidth + this.groupSpacing)) + ",0)")
       .selectAll("rect")
       .data(d => <number[]>d[this.dataProperty])
       .transition()

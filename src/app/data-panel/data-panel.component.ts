@@ -21,14 +21,15 @@ export class DataPanelComponent implements OnInit {
     }
   }
   ngOnInit() {
+    this.dataSource = this.dataService.getDataSource();
     this.dataService.dataUpdated.subscribe(() => {
-      this.dataSource = this.dataService.getDataSource();
       this.updating = false;
     });
   }
-
+  // testUrlBase = "https://raw.githubusercontent.com/AdamMalek/TestData/master";
+  testUrlBase = "http://localhost:3000";
   set(i) {
-    this.dataService.setDataSource("https://raw.githubusercontent.com/AdamMalek/TestData/master/test" + (i + 1) + ".json");
-      this.updating = true;
+    this.dataService.setDataSource(this.testUrlBase + "/test" + (i + 1) + ".json");
+    this.updating = true;
   }
 }
